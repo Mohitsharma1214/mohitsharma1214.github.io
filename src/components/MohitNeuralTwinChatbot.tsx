@@ -181,11 +181,12 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
         isLead,
       });
 
-      // If visitor provided an email address, automatically route to the Admin Panel Table
+      // If visitor provided an email address, automatically route to the Admin Panel Table & Web3Forms
       if (hasEmail && emailMatch) {
+        const capturedEmail = emailMatch[0];
         InquiryService.submitInquiry({
           name: 'AI Copilot Visitor',
-          email: emailMatch[0],
+          email: capturedEmail,
           topic: 'AI Agent Inbound Lead',
           message: text.trim(),
           source: 'ai_agent',
@@ -194,6 +195,26 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
             capturedAt: new Date().toISOString(),
           },
         }).catch((e) => console.warn('Notice saving AI lead to admin inquiries:', e));
+
+        // Forward to Web3Forms backup email
+        const web3formsAccessKey =
+          import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || 'f3866959-f408-42fa-9896-4a28c392bfcd';
+
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            access_key: web3formsAccessKey,
+            name: 'AI Copilot Inbound Lead',
+            email: capturedEmail,
+            subject: `[AI Copilot Lead] from ${capturedEmail}`,
+            message: `User message: "${text.trim()}"\n\nAI Response: "${response.text}"`,
+            from_name: 'Mohit AI Co-Pilot',
+          }),
+        }).catch((e) => console.warn('Notice sending AI lead via Web3Forms:', e));
       }
     } catch (err) {
       console.error('Chat error:', err);

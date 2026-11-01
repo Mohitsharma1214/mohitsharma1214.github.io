@@ -151,6 +151,13 @@ export async function trackVisitorLanding(): Promise<void> {
   }
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /**
  * Dispatches an instant Telegram alert when someone submits the Contact Form.
  */
@@ -171,15 +178,15 @@ export async function notifyContactFormSubmission(data: {
   });
 
   const text = [
-    `📬 *New Contact Form Submission!*`,
+    `📬 <b>New Contact Form Submission!</b>`,
     ``,
-    `👤 *From:* ${data.name.trim()}`,
-    `📧 *Email:* \`${data.email.trim()}\``,
-    `🎯 *Topic:* ${data.topic.trim()}`,
-    `💬 *Message:*`,
-    `"${data.message.trim()}"`,
+    `👤 <b>From:</b> ${escapeHtml(data.name.trim())}`,
+    `📧 <b>Email:</b> <code>${escapeHtml(data.email.trim())}</code>`,
+    `🎯 <b>Topic:</b> ${escapeHtml(data.topic.trim())}`,
+    `💬 <b>Message:</b>`,
+    `"${escapeHtml(data.message.trim())}"`,
     ``,
-    `⏱ *Time:* ${now} IST`,
+    `⏱ <b>Time:</b> ${now} IST`,
   ].join('\n');
 
   try {
@@ -190,7 +197,7 @@ export async function notifyContactFormSubmission(data: {
       body: JSON.stringify({
         chat_id: TARGET_CHAT_ID,
         text,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         disable_web_page_preview: true,
       }),
     });
@@ -220,8 +227,8 @@ export async function notifyAiChatActivity(data: {
   });
 
   const title = data.isLead
-    ? `🚨 *Direct Lead / Contact Shared in AI Chat!*`
-    : `🤖 *Visitor Chatted with AI Copilot*`;
+    ? `🚨 <b>Direct Lead / Contact Shared in AI Chat!</b>`
+    : `🤖 <b>Visitor Chatted with AI Copilot</b>`;
 
   const truncatedReply = data.botReply
     ? data.botReply.slice(0, 280) + (data.botReply.length > 280 ? '...' : '')
@@ -230,14 +237,14 @@ export async function notifyAiChatActivity(data: {
   const textLines = [
     title,
     ``,
-    `👤 *Visitor:* "${data.userQuery.trim()}"`,
+    `👤 <b>Visitor:</b> "${escapeHtml(data.userQuery.trim())}"`,
   ];
 
   if (truncatedReply) {
-    textLines.push(`🤖 *AI Answer:* "${truncatedReply.trim()}"`);
+    textLines.push(`🤖 <b>AI Answer:</b> "${escapeHtml(truncatedReply.trim())}"`);
   }
 
-  textLines.push(``, `⏱ *Time:* ${now} IST`);
+  textLines.push(``, `⏱ <b>Time:</b> ${now} IST`);
 
   try {
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
@@ -247,7 +254,7 @@ export async function notifyAiChatActivity(data: {
       body: JSON.stringify({
         chat_id: TARGET_CHAT_ID,
         text: textLines.join('\n'),
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         disable_web_page_preview: true,
       }),
     });
