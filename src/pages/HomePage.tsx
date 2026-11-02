@@ -215,7 +215,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
                   </div>
                   <span className="text-[11px] text-slate-300 font-semibold tracking-wide ml-1.5 hidden sm:inline">
-                    system_architecture.onnx
+                    pipeline_architecture.onnx
                   </span>
                 </div>
                 <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
@@ -228,7 +228,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    Neural Flow
+                    Pipeline Flow
                   </button>
                   <button
                     type="button"
@@ -239,7 +239,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    Live Pipeline
+                    Live Simulator
                   </button>
                 </div>
               </div>
