@@ -114,7 +114,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["<150ms End-to-End Latency", "Govt. of India Copyright (SW-19841/2024)", "100% Offline Edge Autonomy"],
     featured: true,
     displayOrder: 1,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793111274034-real-time-driver-drowsiness-detection.png",
+    coverImage: "/assets/blogs/edge-fatigue-tracking-sub-150ms.png",
     repoUrl: "https://github.com/Mohitsharma1214/Driver-Drowsiness-Detection-System",
     docUrl: "https://copyright.gov.in/Documents/ERegister/E-Register_December_2024.pdf#page=91",
     sections: {
@@ -154,7 +154,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["0.84 mAP Precision", "0.78 IoU Segmentation", "<120ms Inference Time"],
     featured: true,
     displayOrder: 2,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793113973260-hair-strand-segmentation-dashboard.png",
+    coverImage: "/assets/blogs/microscopic-hair-segmentation-yolov11-maskrcnn.png",
     repoUrl: "https://github.com/Mohitsharma1214/Hair-Strand-Detection",
     sections: {
       overview: "A specialized clinical trichology computer vision pipeline engineered to isolate and quantify individual hair strands from high-resolution polarized trichoscopy images. The project represents a deep research-driven engineering journey: starting from initial exploratory experiments with YOLOv11, discovering the fundamental theoretical limitations of bounding boxes and semantic segmentation on acute crossing fibers, and advancing to a customized two-stage Mask R-CNN (ResNet-50-FPN) instance segmentation architecture that yields individual pixel masks for every overlapping strand.",
@@ -196,7 +196,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["0.35 Hallucination Gating Threshold", "Strict Document Isolation", "Sub-2s Query Latency"],
     featured: true,
     displayOrder: 3,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793114612487-neon-enterprise-document-intelligence-dashboard.png",
+    coverImage: "/assets/blogs/strictly-grounded-rag-logistics.png",
     repoUrl: "https://github.com/Mohitsharma1214/Ultra-Doc-Intelligence",
     demoUrl: "https://ultra-doc-intelligence-orpin.vercel.app/",
     sections: {
@@ -236,7 +236,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["Automated QA Flow Execution", "Real-Time Telemetry Normalization", "Production Client Deployment"],
     featured: true,
     displayOrder: 4,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793114753699-autonomous-ai-testing-dashboard.png",
+    coverImage: "/assets/blogs/autonomous-qa-agent-orchestration.png",
     isProprietary: true,
     sections: {
       overview: "A suite of goal-oriented AI agents developed at Sodio Technologies. One agent framework automates end-to-end software test execution by dynamically planning test steps, executing interactions, and generating QA logs. A companion agent system ingests, cleans, and structures continuous health data exported from iPhone / Apple Health for downstream clinical review.",
@@ -275,7 +275,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["Personalized Feed Discovery", "Sub-100ms Feed Generation", "Production Feature Integration"],
     featured: false,
     displayOrder: 5,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793115170908-neon-personalized-recommendation-dashboard.png",
+    coverImage: "/assets/blogs/realtime-recommendation-systems-two-stage.png",
     isProprietary: true,
     sections: {
       overview: "A content recommendation pipeline developed at Sodio Technologies designed to deliver personalized post streams. The system maps user interaction histories (views, likes, bookmarks, reading dwell time) and matches them with semantic post representations to produce engaging discovery feeds.",
@@ -314,7 +314,7 @@ export const PROJECTS: ProjectCaseStudy[] = [
     metrics: ["5,000+ Images Processed / Day", "<120ms Inference Latency", ">90% Model Accuracy", "~20% GPU Training Speedup"],
     featured: true,
     displayOrder: 6,
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/projects/1793115545384-ai-dermatology-diagnostic-dashboard.png",
+    coverImage: "/assets/blogs/scaling-medical-cv-tensorrt-5000-images.png",
     isProprietary: true,
     sections: {
       overview: "An enterprise clinical AI diagnostic backend developed at Hairscope. The platform processes high-resolution skin and hair condition photographs, runs deep learning classification and segmentation models, and produces diagnostic feature reports for clinical practitioners.",
@@ -446,7 +446,7 @@ export const TECHNICAL_ARTICLES: TechnicalArticle[] = [
     category: "MLOps & AI Deployment",
     readTime: "12 min read",
     status: "Published Technical Breakdown",
-    coverImage: "https://zxovekhtcajtefedkkee.supabase.co/storage/v1/object/public/blog-images/covers/1793182413506-deploying-ml-models-with-fastapi-and-docker.png",
+    coverImage: "/assets/blogs/onnx-fp16-vs-int8-quantization-benchmarks.png",
     publishDate: "Oct 2026",
     summary: "Training a machine learning model is only one stage of delivering an AI product. Learn how to expose inference through FastAPI, package dependencies with Docker, validate inputs, manage model versions, and monitor latency, errors, and resource usage in production.",
     contentMarkdown: `### The Transition from Notebook to Production
