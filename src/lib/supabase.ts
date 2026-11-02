@@ -12,12 +12,32 @@ export const isSupabaseConfigured = Boolean(
   !supabaseUrl.includes('your-project')
 );
 
+// Resilient fetch wrapper with a 3.5s timeout:
+// If Supabase is paused, down, or blocked by ISP/DNS, it aborts quickly
+// so the portfolio instantly falls back to its full local dataset without hanging!
+const timeoutFetch: typeof fetch = (url, options = {}) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+  // Combine caller signal with timeout signal if provided
+  if (options.signal) {
+    options.signal.addEventListener('abort', () => controller.abort());
+  }
+
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+      },
+      global: {
+        fetch: timeoutFetch,
       },
     })
   : null;

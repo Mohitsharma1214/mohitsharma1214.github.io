@@ -34,9 +34,10 @@ export const ProjectCoverImage: React.FC<ProjectCoverImageProps> = ({
     })();
 
   const hasAnimation = Boolean(resolvedProjectId);
-  const hasScreenshot = Boolean(coverImage && coverImage.trim());
+  const [imgError, setImgError] = useState(false);
+  const hasScreenshot = Boolean(coverImage && coverImage.trim() && !imgError);
 
-  // Default to screenshot if available, otherwise animation
+  // Default to screenshot if available and not errored, otherwise animation
   const [viewMode, setViewMode] = useState<'image' | 'animation'>(
     hasScreenshot ? 'image' : 'animation'
   );
@@ -93,6 +94,10 @@ export const ProjectCoverImage: React.FC<ProjectCoverImageProps> = ({
             src={coverImage}
             alt={`${title} project preview`}
             loading="lazy"
+            onError={() => {
+              setImgError(true);
+              if (hasAnimation) setViewMode('animation');
+            }}
             className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
