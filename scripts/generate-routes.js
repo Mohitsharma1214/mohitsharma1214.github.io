@@ -9,6 +9,123 @@ const distDir = path.resolve(__dirname, '../dist');
 
 const BASE_URL = 'https://mohitsharma.is-a.dev';
 
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[char]);
+}
+
+// Safe semantic text snapshot. Raw HTML from Markdown is escaped.
+// React still renders the full rich Markdown once the app starts.
+function renderMarkdownSnapshot(markdown = '') {
+  const lines = String(markdown).replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let paragraph = [];
+  let list = [];
+  let code = [];
+  let inCode = false;
+
+  const flushP = () => {
+    if (paragraph.length) out.push(`<p>${paragraph.map(escapeHtml).join('<br>')}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (list.length) out.push(`<ul>${list.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`);
+    list = [];
+  };
+  const flushCode = () => {
+    if (code.length) out.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
+    code = [];
+  };
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      flushP();
+      flushList();
+      if (inCode) flushCode();
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) {
+      code.push(line);
+      continue;
+    }
+    if (!line.trim()) {
+      flushP();
+      flushList();
+      continue;
+    }
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      flushP();
+      flushList();
+      const level = heading[1].length;
+      out.push(`<h${level}>${escapeHtml(heading[2])}</h${level}>`);
+      continue;
+    }
+    const item = line.match(/^\s*[-*+]\s+(.+)$/);
+    if (item) {
+      flushP();
+      list.push(item[1]);
+      continue;
+    }
+    flushList();
+    paragraph.push(line);
+  }
+
+  if (inCode) flushCode();
+  flushP();
+  flushList();
+  return out.join('\n');
+}
+
+function buildRouteSnapshot(route, blogs) {
+  if (route.blogData) {
+    const b = route.blogData;
+    const image = b.cover_image
+      ? `<img src="${escapeHtml(b.cover_image)}" alt="${escapeHtml(b.title)}" loading="eager" style="max-width:100%;height:auto">`
+      : '';
+
+    return `<main class="max-w-4xl mx-auto px-4 py-12 text-slate-900">
+      <nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/blogs/">Blogs</a></nav>
+      <article>
+        <header>
+          <h1>${escapeHtml(b.title || route.title)}</h1>
+          ${b.subtitle ? `<p>${escapeHtml(b.subtitle)}</p>` : ''}
+          ${b.summary ? `<p>${escapeHtml(b.summary)}</p>` : ''}
+          ${image}
+        </header>
+        <div>${renderMarkdownSnapshot(b.content_markdown || '')}</div>
+        <p><a href="/blogs/">← All technical blogs</a></p>
+      </article>
+    </main>`;
+  }
+
+  if (route.path === 'blogs') {
+    const entries = blogs.map(b => `<li><article>
+      <h2><a href="/blogs/${encodeURIComponent(b.id)}/">${escapeHtml(b.title || b.id)}</a></h2>
+      ${b.subtitle ? `<p>${escapeHtml(b.subtitle)}</p>` : ''}
+      ${b.summary ? `<p>${escapeHtml(b.summary)}</p>` : ''}
+    </article></li>`).join('\n');
+
+    return `<main class="max-w-5xl mx-auto px-4 py-12 text-slate-900">
+      <h1>Technical Blogs &amp; Engineering Notes</h1>
+      <p>Technical articles on computer vision, machine learning systems, production AI, and LLM engineering.</p>
+      <ul>${entries || '<li>New technical articles will appear here.</li>'}</ul>
+    </main>`;
+  }
+
+  return `<main class="max-w-4xl mx-auto px-4 py-12 text-slate-900">
+    <h1>${escapeHtml(route.title)}</h1>
+    <p>${escapeHtml(route.description)}</p>
+    <p><a href="/">Return to the portfolio homepage</a></p>
+  </main>`;
+}
+
 const staticRoutes = [
   {
     path: 'about',
@@ -51,6 +168,7 @@ const staticRoutes = [
     description: 'Deep technical articles, latency benchmarks, quantization analyses, and architectural breakdowns derived directly from production AI and edge deployments.',
     canonical: `${BASE_URL}/blogs/`,
     breadcrumbName: 'Writing',
+    robots: 'noindex,follow',
   },
   {
     path: 'contact',
@@ -65,6 +183,7 @@ const staticRoutes = [
     description: 'Administrative portal for creating, editing, and publishing technical blog posts.',
     canonical: `${BASE_URL}/admin/`,
     breadcrumbName: 'Admin',
+    robots: 'noindex,nofollow',
   },
 ];
 
@@ -79,6 +198,8 @@ async function generateAllRoutes() {
 
   // Fetch blogs dynamically from Supabase
   const blogs = await fetchPublishedBlogs();
+  const blogIndexRoute = staticRoutes.find((route) => route.path === 'blogs');
+  if (blogIndexRoute) blogIndexRoute.blogIndexData = blogs;
 
   const blogRoutes = blogs.map((blog) => {
     const rawDesc = blog.subtitle || blog.summary || 'Technical breakdown and production engineering analysis by Mohit Sharma.';
@@ -109,54 +230,58 @@ async function generateAllRoutes() {
 
     let routeHtml = baseHtml;
 
+    const safeTitle = escapeHtml(route.title);
+    const safeDescription = escapeHtml(route.description);
+    const safeCanonical = escapeHtml(route.canonical);
+
     // 1. Replace Title & Meta Title
     routeHtml = routeHtml.replace(
       /<title>.*?<\/title>/i,
-      `<title>${route.title}</title>`
+      `<title>${safeTitle}</title>`
     );
     routeHtml = routeHtml.replace(
       /<meta name="title" content=".*?" \/>/i,
-      `<meta name="title" content="${route.title}" />`
+      `<meta name="title" content="${safeTitle}" />`
     );
 
     // 2. Replace Description
     routeHtml = routeHtml.replace(
       /<meta name="description" content=".*?" \/>/i,
-      `<meta name="description" content="${route.description}" />`
+      `<meta name="description" content="${safeDescription}" />`
     );
 
     // 3. Replace Canonical URL
     routeHtml = routeHtml.replace(
       /<link rel="canonical" href=".*?" \/>/i,
-      `<link rel="canonical" href="${route.canonical}" />`
+      `<link rel="canonical" href="${safeCanonical}" />`
     );
 
     // 4. Replace OG & Twitter URLs
     routeHtml = routeHtml.replace(
       /<meta property="og:url" content=".*?" \/>/i,
-      `<meta property="og:url" content="${route.canonical}" />`
+      `<meta property="og:url" content="${safeCanonical}" />`
     );
     routeHtml = routeHtml.replace(
       /<meta name="twitter:url" content=".*?" \/>/i,
-      `<meta name="twitter:url" content="${route.canonical}" />`
+      `<meta name="twitter:url" content="${safeCanonical}" />`
     );
 
     // 5. Replace OG & Twitter Title and Description
     routeHtml = routeHtml.replace(
       /<meta property="og:title" content=".*?" \/>/i,
-      `<meta property="og:title" content="${route.title}" />`
+      `<meta property="og:title" content="${safeTitle}" />`
     );
     routeHtml = routeHtml.replace(
       /<meta property="og:description" content=".*?" \/>/i,
-      `<meta property="og:description" content="${route.description}" />`
+      `<meta property="og:description" content="${safeDescription}" />`
     );
     routeHtml = routeHtml.replace(
       /<meta name="twitter:title" content=".*?" \/>/i,
-      `<meta name="twitter:title" content="${route.title}" />`
+      `<meta name="twitter:title" content="${safeTitle}" />`
     );
     routeHtml = routeHtml.replace(
       /<meta name="twitter:description" content=".*?" \/>/i,
-      `<meta name="twitter:description" content="${route.description}" />`
+      `<meta name="twitter:description" content="${safeDescription}" />`
     );
 
     // 6. Replace OG Type (article vs website)
@@ -169,17 +294,18 @@ async function generateAllRoutes() {
 
     // 7. Replace OG / Twitter Image if specific image provided
     if (route.image) {
+      const safeImage = escapeHtml(route.image);
       routeHtml = routeHtml.replace(
         /<meta property="og:image" content=".*?" \/>/i,
-        `<meta property="og:image" content="${route.image}" />`
+        `<meta property="og:image" content="${safeImage}" />`
       );
       routeHtml = routeHtml.replace(
         /<meta property="og:image:secure_url" content=".*?" \/>/i,
-        `<meta property="og:image:secure_url" content="${route.image}" />`
+        `<meta property="og:image:secure_url" content="${safeImage}" />`
       );
       routeHtml = routeHtml.replace(
         /<meta name="twitter:image" content=".*?" \/>/i,
-        `<meta name="twitter:image" content="${route.image}" />`
+        `<meta name="twitter:image" content="${safeImage}" />`
       );
     }
 
@@ -259,17 +385,25 @@ async function generateAllRoutes() {
       routeHtml = routeHtml.replace('</head>', `${schemaScripts}\n  </head>`);
     }
 
-    // 9. Semantic crawlable snapshot for web spiders inside <div id="root">
-    const crawlableContent = `
-    <div id="root">
-      <main class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">
-        <h1>${route.title}</h1>
-        <p>${route.description}</p>
-        ${route.blogData && route.blogData.summary ? `<p>${route.blogData.summary}</p>` : ''}
-      </main>
-    </div>`.trim();
+    // Replace the actual marked root snapshot. The old code searched for an
+    // empty #root, but index.html ships with a populated pre-rendered shell.
+    const markers = /<!-- ROUTE_SNAPSHOT_START -->[\s\S]*?<!-- ROUTE_SNAPSHOT_END -->/;
+    if (!markers.test(routeHtml)) {
+      throw new Error('Missing route snapshot markers in index.html');
+    }
 
-    routeHtml = routeHtml.replace('<div id="root"></div>', crawlableContent);
+    const snapshot = buildRouteSnapshot(route, blogs);
+    routeHtml = routeHtml.replace(
+      markers,
+      `<!-- ROUTE_SNAPSHOT_START -->\n${snapshot}\n<!-- ROUTE_SNAPSHOT_END -->`
+    );
+
+    if (route.robots) {
+      routeHtml = routeHtml.replace(
+        /<meta name="robots" content=".*?" \/>/i,
+        `<meta name="robots" content="${escapeHtml(route.robots)}" />`
+      );
+    }
 
     fs.writeFileSync(path.join(routeDir, 'index.html'), routeHtml, 'utf8');
   }

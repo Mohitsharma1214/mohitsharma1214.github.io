@@ -38,11 +38,13 @@ ON public.blogs
 FOR SELECT 
 USING (published = true);
 
--- Authenticated admins can perform all write actions (insert, update, delete)
+-- Only the authorized site owner can perform write actions (insert, update, delete)
 DROP POLICY IF EXISTS "Authenticated users have full write access" ON public.blogs;
-CREATE POLICY "Authenticated users have full write access" 
-ON public.blogs 
-FOR ALL 
-TO authenticated 
-USING (true)
-WITH CHECK (true);
+DROP POLICY IF EXISTS "Only site owner can manage blogs" ON public.blogs;
+
+CREATE POLICY "Only site owner can manage blogs"
+ON public.blogs
+FOR ALL
+TO authenticated
+USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com')
+WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');

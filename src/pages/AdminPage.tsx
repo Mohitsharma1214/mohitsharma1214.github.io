@@ -20,7 +20,6 @@ import {
   LogOut,
   Save,
   Image as ImageIcon,
-  Fingerprint,
   Upload,
   UploadCloud,
   Link as LinkIcon,
@@ -45,7 +44,6 @@ import { InquiryService } from '../services/inquiryService';
 
 // STRICT SECURITY PROTOCOLS
 const AUTHORIZED_ADMIN_EMAIL = 'mohitxsharma09@gmail.com';
-const MASTER_PIN = import.meta.env.VITE_ADMIN_MASTER_PIN || '984124';
 
 const AdminPageInner: React.FC = () => {
   const { user, loading: authLoading, signIn, signOut } = useAuth();
@@ -70,9 +68,7 @@ const AdminPageInner: React.FC = () => {
   // Auth Form State (Sign-In Only - Public Registration Disabled)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [masterPin, setMasterPin] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showPin, setShowPin] = useState(false);
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -247,13 +243,6 @@ const AdminPageInner: React.FC = () => {
     if (email.trim().toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
       recordFailedAttempt();
       setAuthError('Security Alert: This portal is strictly restricted to the site owner.');
-      return;
-    }
-
-    // 3. Master PIN Guard
-    if (masterPin.trim() !== MASTER_PIN) {
-      recordFailedAttempt();
-      setAuthError('Security Alert: Invalid Master Security PIN.');
       return;
     }
 
@@ -615,7 +604,7 @@ const AdminPageInner: React.FC = () => {
               Admin Access Lock
             </h1>
             <p className="text-xs text-slate-500">
-              Private publishing studio for Mohit Sharma. Restricted by email whitelist, password, and Master Security PIN.
+              Private publishing studio for Mohit Sharma. Restricted to authorized Supabase admin credentials.
             </p>
           </div>
 
@@ -675,35 +664,6 @@ const AdminPageInner: React.FC = () => {
               </div>
             </div>
 
-            {/* Master Security PIN Field (2FA Layer) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <Fingerprint className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Master Security PIN (2FA)</span>
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">Default: 984124</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPin ? 'text' : 'password'}
-                  required
-                  disabled={isLocked}
-                  value={masterPin}
-                  onChange={(e) => setMasterPin(e.target.value)}
-                  placeholder="Enter 6-digit Master PIN..."
-                  className="w-full pl-3.5 pr-10 py-2.5 text-xs font-mono bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 shadow-xs disabled:opacity-50 tracking-widest"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                >
-                  {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={authSubmitting || isLocked}
@@ -712,10 +672,10 @@ const AdminPageInner: React.FC = () => {
               {authSubmitting ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Verifying 2FA Credentials...</span>
+                  <span>Signing in...</span>
                 </>
               ) : (
-                <span>Verify &amp; Access Studio</span>
+                <span>Sign in &amp; Access Studio</span>
               )}
             </button>
           </form>
@@ -727,7 +687,7 @@ const AdminPageInner: React.FC = () => {
               <span>Multi-Layer Defense Active</span>
             </div>
             <p>
-              Unauthorized access attempts are blocked by PostgreSQL Row-Level Security, email whitelist, and PIN verification.
+              Unauthorized write operations are blocked at the database level by PostgreSQL Row-Level Security.
             </p>
           </div>
 

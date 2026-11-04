@@ -37,9 +37,6 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://zxovekhtcajtefedkkee.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_JxI18d2ketnFvFZ6Yn0Beg_yXpmd7uJ' }}
-          VITE_ADMIN_MASTER_PIN: ${{ secrets.VITE_ADMIN_MASTER_PIN || '984124' }}
-          VITE_GROQ_API_KEY: ${{ secrets.VITE_GROQ_API_KEY || '' }}
-          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY || '' }}
 
 
 

@@ -72,7 +72,7 @@ export async function fetchPublishedBlogs() {
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseCredentials();
 
   try {
-    const endpoint = `${supabaseUrl}/rest/v1/blogs?select=id,title,subtitle,category,cover_image,published,created_at,publish_date&published=eq.true&order=created_at.desc`;
+    const endpoint = `${supabaseUrl}/rest/v1/blogs?select=id,title,subtitle,category,cover_image,published,created_at,publish_date,summary,content_markdown&published=eq.true&order=created_at.desc`;
     const res = await fetch(endpoint, {
       headers: {
         apikey: supabaseAnonKey,
