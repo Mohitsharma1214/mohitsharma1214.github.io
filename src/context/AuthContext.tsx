@@ -29,19 +29,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // 1. Get initial session with safe error handling & automatic purge of stale tokens
+    supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (error || !data?.session) {
+          if (
+            error?.message?.toLowerCase().includes('refresh') ||
+            error?.message?.toLowerCase().includes('token')
+          ) {
+            // Stale or revoked token in localStorage: purge it so it doesn't loop
+            supabase.auth.signOut().catch(() => {});
+          }
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(data.session);
+          setUser(data.session.user);
+        }
+      })
+      .catch(() => {
+        // Network or fetch abort: purge corrupted session safely
+        supabase.auth.signOut().catch(() => {});
+        setSession(null);
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     // 2. Listen for auth changes (sign in, sign out, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(session);
+        setUser(session.user);
+      }
       setLoading(false);
     });
 

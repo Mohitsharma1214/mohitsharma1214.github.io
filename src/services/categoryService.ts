@@ -14,54 +14,43 @@ export class CategoryService {
     const categorySet = new Set<string>();
 
     if (isSupabaseConfigured && supabase) {
-      // 1. Try fetching from blog_categories table
       try {
-        const { data, error } = await supabase
-          .from('blog_categories')
-          .select('name')
-          .order('name', { ascending: true });
+        // Run lookups concurrently with a strict 2.0s timeout to never stall page load
+        const fetchCategoriesPromise = Promise.allSettled([
+          supabase.from('blog_categories').select('name').order('name', { ascending: true }),
+          supabase.from('site_settings').select('value').eq('key', 'blog_categories').maybeSingle(),
+          supabase.from('blogs').select('category'),
+        ]);
 
-        if (!error && data && data.length > 0) {
-          data.forEach((row: { name?: string }) => {
-            if (row.name?.trim()) categorySet.add(row.name.trim());
-          });
+        const timeoutPromise = new Promise<{ status: 'rejected' }>((resolve) =>
+          setTimeout(() => resolve({ status: 'rejected' }), 2000)
+        );
+
+        const results = await Promise.race([fetchCategoriesPromise, timeoutPromise]);
+
+        if (Array.isArray(results)) {
+          const [catRes, settingsRes, blogsRes] = results;
+
+          if (catRes.status === 'fulfilled' && !catRes.value.error && catRes.value.data) {
+            catRes.value.data.forEach((row: { name?: string }) => {
+              if (row.name?.trim()) categorySet.add(row.name.trim());
+            });
+          }
+
+          if (settingsRes.status === 'fulfilled' && !settingsRes.value.error && settingsRes.value.data?.value && Array.isArray(settingsRes.value.data.value.categories)) {
+            settingsRes.value.data.value.categories.forEach((cat: unknown) => {
+              if (typeof cat === 'string' && cat.trim()) categorySet.add(cat.trim());
+            });
+          }
+
+          if (blogsRes.status === 'fulfilled' && !blogsRes.value.error && blogsRes.value.data) {
+            blogsRes.value.data.forEach((row: { category?: string }) => {
+              if (row.category?.trim()) categorySet.add(row.category.trim());
+            });
+          }
         }
-      } catch {
-        // Table may not be created yet, proceed to other DB sources
-      }
-
-      // 2. Try fetching from site_settings (key: 'blog_categories')
-      try {
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('value')
-          .eq('key', 'blog_categories')
-          .maybeSingle();
-
-        if (!error && data?.value && Array.isArray(data.value.categories)) {
-          data.value.categories.forEach((cat: unknown) => {
-            if (typeof cat === 'string' && cat.trim()) {
-              categorySet.add(cat.trim());
-            }
-          });
-        }
-      } catch {
-        // Site settings query failed or table not ready
-      }
-
-      // 3. Query all categories present in the blogs table in the database
-      try {
-        const { data, error } = await supabase
-          .from('blogs')
-          .select('category');
-
-        if (!error && data && data.length > 0) {
-          data.forEach((row: { category?: string }) => {
-            if (row.category?.trim()) categorySet.add(row.category.trim());
-          });
-        }
-      } catch {
-        // Blogs query failed
+      } catch (err) {
+        console.warn('Category fetch error or timeout, falling back:', err);
       }
     }
 

@@ -100,7 +100,14 @@ export const BlogService = {
 
         query = query.order('created_at', { ascending: false }).range(from, to);
 
-        const { data, count, error } = await query;
+        // Resilient 3.0s timeout race: if Supabase hangs, is stalled on auth, or drops packets,
+        // guarantee immediate fallback so UI never stays stuck on skeleton loaders
+        const queryPromise = Promise.resolve(query);
+        const timeoutPromise = new Promise<{ data: null; count: null; error: { message: string } }>((resolve) =>
+          setTimeout(() => resolve({ data: null, count: null, error: { message: 'Supabase query timed out after 3000ms' } }), 3000)
+        );
+
+        const { data, count, error } = await Promise.race([queryPromise, timeoutPromise]);
 
         if (!error && data) {
           const totalCount = count || 0;
@@ -168,12 +175,18 @@ export const BlogService = {
   async getBlogById(id: string): Promise<BlogFull | null> {
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase
+        const singleQuery = supabase
           .from('blogs')
           .select('*')
           .eq('id', id)
           .eq('published', true)
           .single();
+
+        const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+          setTimeout(() => resolve({ data: null, error: { message: 'Query timed out after 3000ms' } }), 3000)
+        );
+
+        const { data, error } = await Promise.race([Promise.resolve(singleQuery), timeoutPromise]);
 
         if (!error && data) {
           return mapDbRowToFull(data);
