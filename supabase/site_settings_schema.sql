@@ -23,14 +23,16 @@ ON public.site_settings
 FOR SELECT 
 USING (true);
 
--- Authenticated admins can insert/update settings
+-- Only the authorized site owner can perform write actions (insert, update)
 DROP POLICY IF EXISTS "Authenticated users have full write access to site settings" ON public.site_settings;
-CREATE POLICY "Authenticated users have full write access to site settings" 
+DROP POLICY IF EXISTS "Only site owner can manage site settings" ON public.site_settings;
+
+CREATE POLICY "Only site owner can manage site settings" 
 ON public.site_settings 
 FOR ALL 
 TO authenticated 
-USING (true) 
-WITH CHECK (true);
+USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com')
+WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');
 
 -- 4. Seed default profile settings record
 INSERT INTO public.site_settings (key, value)

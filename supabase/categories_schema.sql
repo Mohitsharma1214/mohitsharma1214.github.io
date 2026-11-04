@@ -23,14 +23,16 @@ ON public.blog_categories
 FOR SELECT 
 USING (true);
 
--- Authenticated admins can perform all write actions (insert, update, delete)
+-- Only the authorized site owner can perform write actions (insert, update, delete)
 DROP POLICY IF EXISTS "Authenticated users have full write access to blog categories" ON public.blog_categories;
-CREATE POLICY "Authenticated users have full write access to blog categories" 
+DROP POLICY IF EXISTS "Only site owner can manage blog categories" ON public.blog_categories;
+
+CREATE POLICY "Only site owner can manage blog categories" 
 ON public.blog_categories 
 FOR ALL 
 TO authenticated 
-USING (true) 
-WITH CHECK (true);
+USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com')
+WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');
 
 -- 4. Seed initial categories from current database articles
 INSERT INTO public.blog_categories (id, name)

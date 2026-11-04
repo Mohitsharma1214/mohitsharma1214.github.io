@@ -42,11 +42,13 @@ ON public.projects
 FOR SELECT 
 USING (true);
 
--- Authenticated admins have full write access (insert, update, delete)
+-- Only the authorized site owner can perform write actions (insert, update, delete)
 DROP POLICY IF EXISTS "Authenticated users have full write access to projects" ON public.projects;
-CREATE POLICY "Authenticated users have full write access to projects" 
+DROP POLICY IF EXISTS "Only site owner can manage projects" ON public.projects;
+
+CREATE POLICY "Only site owner can manage projects" 
 ON public.projects 
 FOR ALL 
 TO authenticated 
-USING (true)
-WITH CHECK (true);
+USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com')
+WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');

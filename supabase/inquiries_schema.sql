@@ -29,22 +29,17 @@ FOR INSERT
 TO anon, authenticated 
 WITH CHECK (true);
 
--- 4. Policy: Authenticated admin (Mohit) has full access to read, update status, and delete
+-- 4. Policy: Only site owner (Mohit) has access to read, update status, and delete inquiries
+DROP POLICY IF EXISTS "Public read fallback" ON public.inquiries;
 DROP POLICY IF EXISTS "Authenticated users have full access to inquiries" ON public.inquiries;
-CREATE POLICY "Authenticated users have full access to inquiries" 
+DROP POLICY IF EXISTS "Only site owner can read and manage inquiries" ON public.inquiries;
+
+CREATE POLICY "Only site owner can read and manage inquiries" 
 ON public.inquiries 
 FOR ALL 
 TO authenticated 
-USING (true) 
-WITH CHECK (true);
-
--- 5. Fallback policy for anon read (optional fallback)
-DROP POLICY IF EXISTS "Public read fallback" ON public.inquiries;
-CREATE POLICY "Public read fallback" 
-ON public.inquiries 
-FOR SELECT 
-TO anon 
-USING (true);
+USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com') 
+WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');
 
 -- Create index on created_at for fast descending queries
 CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON public.inquiries(created_at DESC);

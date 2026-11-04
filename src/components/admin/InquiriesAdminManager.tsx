@@ -172,13 +172,11 @@ DROP POLICY IF EXISTS "Anyone can insert inquiries" ON public.inquiries;
 CREATE POLICY "Anyone can insert inquiries" 
 ON public.inquiries FOR INSERT TO anon, authenticated WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Authenticated users have full access to inquiries" ON public.inquiries;
-CREATE POLICY "Authenticated users have full access to inquiries" 
-ON public.inquiries FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Public read fallback" ON public.inquiries;
-CREATE POLICY "Public read fallback" 
-ON public.inquiries FOR SELECT TO anon USING (true);`;
+DROP POLICY IF EXISTS "Authenticated users have full access to inquiries" ON public.inquiries;
+DROP POLICY IF EXISTS "Only site owner can read and manage inquiries" ON public.inquiries;
+CREATE POLICY "Only site owner can read and manage inquiries" 
+ON public.inquiries FOR ALL TO authenticated USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com') WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');`;
 
     navigator.clipboard.writeText(sql);
     setSqlCopied(true);
@@ -861,8 +859,11 @@ ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can insert inquiries" 
 ON public.inquiries FOR INSERT TO anon, authenticated WITH CHECK (true);
 
-CREATE POLICY "Authenticated users have full access to inquiries" 
-ON public.inquiries FOR ALL TO authenticated USING (true) WITH CHECK (true);`}</pre>
+DROP POLICY IF EXISTS "Public read fallback" ON public.inquiries;
+DROP POLICY IF EXISTS "Authenticated users have full access to inquiries" ON public.inquiries;
+DROP POLICY IF EXISTS "Only site owner can read and manage inquiries" ON public.inquiries;
+CREATE POLICY "Only site owner can read and manage inquiries" 
+ON public.inquiries FOR ALL TO authenticated USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com') WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');`}</pre>
               </div>
 
               <div className="flex items-center justify-between gap-3 pt-2">

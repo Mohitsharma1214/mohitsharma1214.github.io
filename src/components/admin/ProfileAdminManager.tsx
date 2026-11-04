@@ -103,7 +103,8 @@ ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public can view site settings" ON public.site_settings;
 CREATE POLICY "Public can view site settings" ON public.site_settings FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Authenticated users have full write access to site settings" ON public.site_settings;
-CREATE POLICY "Authenticated users have full write access to site settings" ON public.site_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);`;
+DROP POLICY IF EXISTS "Only site owner can manage site settings" ON public.site_settings;
+CREATE POLICY "Only site owner can manage site settings" ON public.site_settings FOR ALL TO authenticated USING (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com') WITH CHECK (lower(auth.jwt() ->> 'email') = 'mohitxsharma09@gmail.com');`;
 
     navigator.clipboard.writeText(sql);
     setSqlCopied(true);
