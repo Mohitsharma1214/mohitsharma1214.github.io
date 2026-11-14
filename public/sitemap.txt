@@ -5,6 +5,7 @@ https://mohitsharma.is-a.dev/experience/
 https://mohitsharma.is-a.dev/skills/
 https://mohitsharma.is-a.dev/blogs/
 https://mohitsharma.is-a.dev/contact/
+https://mohitsharma.is-a.dev/blogs/reinforcement-learning-verifiable-rewards-rlvr/
 https://mohitsharma.is-a.dev/blogs/event-driven-architecture-machine-learning-asynchronous-pipelines/
 https://mohitsharma.is-a.dev/blogs/reliable-structured-output-generative-ai-llm-systems/
 https://mohitsharma.is-a.dev/blogs/real-time-object-tracking-edge-detection-association/
