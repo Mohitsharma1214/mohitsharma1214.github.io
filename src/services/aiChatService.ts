@@ -41,6 +41,35 @@ GUIDELINES:
 - Greet visitors warmly and naturally when they say hi or hello.
 - Speak with technical authority, precision, and professionalism.`;
 
+// Helper to accurately identify recruiter leads, contact requests, and message forwarding intents
+export function isLeadOrMessageIntent(query: string): boolean {
+  const q = query.toLowerCase().trim();
+  return (
+    /leave.*message|send.*(message|email|note|it)|can (you|i) (send|forward|relay|pass|give|tell)|forward.*(email|message)|contact.*(him|mohit|you)|hire.*(him|you|mohit)|get in touch|reach out|interview|connect.*(with him|with you)|give.*(email|contact)|tell.*(him|mohit)/i.test(q) ||
+    q.includes('leave a message') ||
+    q.includes('can you send') ||
+    q.includes('can i send') ||
+    q.includes('send my message') ||
+    q.includes('send him') ||
+    q.includes('send it to him') ||
+    q.includes('send to him') ||
+    q.includes('send a message') ||
+    q.includes('i want to hire') ||
+    q.includes('want to hire') ||
+    q.includes('hire him') ||
+    q.includes('hire you') ||
+    q.includes('contact him') ||
+    q.includes('contact you') ||
+    q.includes('reach out to him') ||
+    q.includes('reach out to me') ||
+    q.includes('tell him') ||
+    q.includes('give him my email') ||
+    q.includes('forward my email') ||
+    q.includes('relay my message') ||
+    q === 'leave a message for mohit 📬'
+  );
+}
+
 // Conversational contextual knowledge fallback
 function getConversationalGroundedResponse(userQuery: string): string {
   const q = userQuery.toLowerCase().trim();
@@ -55,23 +84,7 @@ Mohit will review your note and get back to you directly at **${capturedEmail}**
   }
 
   // Request to leave a message / get in touch / hire / send email
-  if (
-    q.includes('leave a message') ||
-    q.includes('contact') ||
-    q.includes('hire') ||
-    q.includes('reach out') ||
-    q.includes('get in touch') ||
-    q.includes('tell him to contact') ||
-    q.includes('tell him to reach') ||
-    q.includes('send my email') ||
-    q.includes('share my email') ||
-    q.includes('can i send') ||
-    q.includes('send it to him') ||
-    q.includes('send him') ||
-    q.includes('forward') ||
-    q.includes('relay') ||
-    q.includes('give you my email')
-  ) {
+  if (isLeadOrMessageIntent(userQuery)) {
     return `Yes, absolutely! You can share your **email address** and message right here in this chat.
 
 I will immediately forward your note directly to Mohit's personal Telegram and email inbox, and log it to his dashboard, so he can respond to you promptly!
@@ -175,23 +188,7 @@ export async function sendChatMessage(
 ): Promise<{ text: string; source: 'llm' | 'grounded-rag' }> {
   const emailMatch = newMessage.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   const q = newMessage.toLowerCase().trim();
-  const isMessageIntent =
-    q.includes('leave a message') ||
-    q.includes('tell him') ||
-    q.includes('reach out') ||
-    q.includes('contact') ||
-    q.includes('hire') ||
-    q.includes('send my email') ||
-    q.includes('share my email') ||
-    q.includes('can i send') ||
-    q.includes('send it to him') ||
-    q.includes('send him') ||
-    q.includes('forward') ||
-    q.includes('relay') ||
-    q.includes('give you my email') ||
-    q.includes('get in touch') ||
-    q === 'leave a message for mohit 📬' ||
-    q.startsWith('leave a message');
+  const isMessageIntent = isLeadOrMessageIntent(newMessage);
 
   const isOwnerIntent =
     q.includes('owner') ||

@@ -14,7 +14,7 @@ import {
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import type { ChatMessage } from '../services/aiChatService';
-import { sendChatMessage } from '../services/aiChatService';
+import { sendChatMessage, isLeadOrMessageIntent } from '../services/aiChatService';
 import { notifyAiChatActivity } from '../services/visitorTelemetryService';
 import { InquiryService } from '../services/inquiryService';
 
@@ -173,7 +173,7 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
       // Instantly notify Mohit on Telegram regarding visitor query or contact lead
       const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       const hasEmail = Boolean(emailMatch);
-      const isLead = hasEmail || /contact|hire|interview|reach out|email me|schedule|call|phone|leave a message|send my email|send it to him/i.test(text);
+      const isLead = hasEmail || isLeadOrMessageIntent(text);
 
       notifyAiChatActivity({
         userQuery: text.trim(),
