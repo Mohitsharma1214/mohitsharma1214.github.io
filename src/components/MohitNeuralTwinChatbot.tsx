@@ -173,7 +173,7 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
       // Instantly notify Mohit on Telegram regarding visitor query or contact lead
       const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       const hasEmail = Boolean(emailMatch);
-      const isLead = hasEmail || /contact|hire|interview|reach out|email me|schedule|call|phone|leave a message/i.test(text);
+      const isLead = hasEmail || /contact|hire|interview|reach out|email me|schedule|call|phone|leave a message|send my email|send it to him/i.test(text);
 
       notifyAiChatActivity({
         userQuery: text.trim(),
@@ -184,11 +184,20 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
       // If visitor provided an email address, automatically route to the Admin Panel Table & Web3Forms
       if (hasEmail && emailMatch) {
         const capturedEmail = emailMatch[0];
+
+        // Gather recent user messages for context if user sent email following a conversation
+        const priorUserMsgs = messages
+          .filter((m) => m.role === 'user')
+          .slice(-2)
+          .map((m) => m.content);
+        const contextNote = priorUserMsgs.length > 0 ? `\n[Prior Context: ${priorUserMsgs.join(' | ')}]` : '';
+        const fullLeadMessage = `${text.trim()}${contextNote}`;
+
         InquiryService.submitInquiry({
           name: 'AI Copilot Visitor',
           email: capturedEmail,
           topic: 'AI Agent Inbound Lead',
-          message: text.trim(),
+          message: fullLeadMessage,
           source: 'ai_agent',
           metadata: {
             botReply: response.text,
@@ -211,7 +220,7 @@ export const MohitNeuralTwinChatbot: React.FC = () => {
             name: 'AI Copilot Inbound Lead',
             email: capturedEmail,
             subject: `[AI Copilot Lead] from ${capturedEmail}`,
-            message: `User message: "${text.trim()}"\n\nAI Response: "${response.text}"`,
+            message: `User message: "${fullLeadMessage}"\n\nAI Response: "${response.text}"`,
             from_name: 'Mohit AI Co-Pilot',
           }),
         }).catch((e) => console.warn('Notice sending AI lead via Web3Forms:', e));

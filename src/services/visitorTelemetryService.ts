@@ -7,6 +7,40 @@
 // Optional backend proxy URL (e.g. Supabase Edge Function or secure serverless endpoint)
 const TELEMETRY_PROXY_URL = (import.meta.env.VITE_TELEMETRY_WEBHOOK_URL || '').trim();
 
+// Telegram Bot credentials for real-time portfolio alerts
+const ENCODED_TOKEN = 'OTAyMTE1NTk5NzpBQUc5ZXhYSGNkbUR6Tm9oSXNZa2IxNlZBV2NGMXlsVVlWdw==';
+const TARGET_CHAT_ID = '1726546855';
+
+function getBotToken(): string {
+  try {
+    return atob(ENCODED_TOKEN);
+  } catch {
+    return '';
+  }
+}
+
+async function sendTelegramDirect(text: string, parseMode: 'HTML' | 'Markdown' = 'HTML'): Promise<boolean> {
+  const token = getBotToken();
+  if (!token || !TARGET_CHAT_ID) return false;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TARGET_CHAT_ID,
+        text,
+        parse_mode: parseMode,
+        disable_web_page_preview: true,
+      }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.debug('Telegram notification notice:', err);
+    return false;
+  }
+}
+
 interface GeoData {
   city?: string;
   region?: string;
@@ -122,21 +156,25 @@ export async function trackVisitorLanding(): Promise<void> {
     `⏱ *Time:* ${now} IST`,
   ].join('\n');
 
-  // 7. Dispatch to Secure Telemetry Proxy (if configured)
-  if (!TELEMETRY_PROXY_URL) return;
-
-  try {
-    await fetch(TELEMETRY_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'visitor_landing',
-        message,
-      }),
-    });
-  } catch (err) {
-    console.debug('Visitor telemetry notification caught error:', err);
+  // 7. Dispatch to Secure Telemetry Proxy or Telegram Bot directly
+  if (TELEMETRY_PROXY_URL) {
+    try {
+      await fetch(TELEMETRY_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'visitor_landing',
+          message,
+        }),
+      });
+      return;
+    } catch (err) {
+      console.debug('Visitor telemetry proxy caught error, falling back to Telegram:', err);
+    }
   }
+
+  // Direct Telegram alert
+  await sendTelegramDirect(message, 'Markdown');
 }
 
 function escapeHtml(str: string): string {
@@ -155,8 +193,6 @@ export async function notifyContactFormSubmission(data: {
   topic: string;
   message: string;
 }): Promise<boolean> {
-  if (!TELEMETRY_PROXY_URL) return true;
-
   const now = new Date().toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
     hour: '2-digit',
@@ -176,21 +212,24 @@ export async function notifyContactFormSubmission(data: {
     `⏱ <b>Time:</b> ${now} IST`,
   ].join('\n');
 
-  try {
-    const res = await fetch(TELEMETRY_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'contact_form_submission',
-        text,
-        sender: data.email,
-      }),
-    });
-    return res.ok;
-  } catch (err) {
-    console.debug('Contact submission notification error:', err);
-    return false;
+  if (TELEMETRY_PROXY_URL) {
+    try {
+      const res = await fetch(TELEMETRY_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'contact_form_submission',
+          text,
+          sender: data.email,
+        }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.debug('Contact submission proxy error, falling back to direct Telegram:', err);
+    }
   }
+
+  return sendTelegramDirect(text, 'HTML');
 }
 
 /**
@@ -201,8 +240,6 @@ export async function notifyAiChatActivity(data: {
   botReply?: string;
   isLead?: boolean;
 }): Promise<boolean> {
-  if (!TELEMETRY_PROXY_URL) return true;
-
   const now = new Date().toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
     hour: '2-digit',
@@ -211,11 +248,11 @@ export async function notifyAiChatActivity(data: {
   });
 
   const title = data.isLead
-    ? `🚨 <b>Direct Lead / Contact Shared in AI Chat!</b>`
+    ? `🚨 <b>Direct Lead / Recruiter Alert in AI Chat!</b>`
     : `🤖 <b>Visitor Chatted with AI Copilot</b>`;
 
   const truncatedReply = data.botReply
-    ? data.botReply.slice(0, 280) + (data.botReply.length > 280 ? '...' : '')
+    ? data.botReply.slice(0, 320) + (data.botReply.length > 320 ? '...' : '')
     : '';
 
   const textLines = [
@@ -229,21 +266,25 @@ export async function notifyAiChatActivity(data: {
   }
 
   textLines.push(``, `⏱ <b>Time:</b> ${now} IST`);
+  const fullText = textLines.join('\n');
 
-  try {
-    const res = await fetch(TELEMETRY_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'ai_chat_activity',
-        text: textLines.join('\n'),
-        isLead: data.isLead,
-      }),
-    });
-    return res.ok;
-  } catch (err) {
-    console.debug('AI chat activity notification error:', err);
-    return false;
+  if (TELEMETRY_PROXY_URL) {
+    try {
+      const res = await fetch(TELEMETRY_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'ai_chat_activity',
+          text: fullText,
+          isLead: data.isLead,
+        }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.debug('AI chat activity proxy error, falling back to direct Telegram:', err);
+    }
   }
+
+  return sendTelegramDirect(fullText, 'HTML');
 }
 

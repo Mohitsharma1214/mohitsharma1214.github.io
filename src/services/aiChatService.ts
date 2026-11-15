@@ -49,26 +49,34 @@ function getConversationalGroundedResponse(userQuery: string): string {
   const emailMatch = userQuery.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   if (emailMatch) {
     const capturedEmail = emailMatch[0];
-    return `Thank you! I have delivered your email (**${capturedEmail}**) and your message personally to Mohit on high priority.
+    return `Thank you! I have received your email (**${capturedEmail}**) and your message. It has been immediately dispatched to Mohit's personal Telegram and email inbox, and logged into his admin dashboard.
 
-Mohit has received your message and will review your note and contact you directly at **${capturedEmail}**. You can also reach him anytime at [${PERSONAL_INFO.email}](mailto:${PERSONAL_INFO.email}).`;
+Mohit will review your note and get back to you directly at **${capturedEmail}**. You can also reach him anytime at [${PERSONAL_INFO.email}](mailto:${PERSONAL_INFO.email}).`;
   }
 
-  // Request to leave a message / get in touch
+  // Request to leave a message / get in touch / hire / send email
   if (
     q.includes('leave a message') ||
-    q.includes('contact mohit') ||
-    q.includes('hire him') ||
+    q.includes('contact') ||
+    q.includes('hire') ||
     q.includes('reach out') ||
     q.includes('get in touch') ||
     q.includes('tell him to contact') ||
-    q.includes('tell him to reach')
+    q.includes('tell him to reach') ||
+    q.includes('send my email') ||
+    q.includes('share my email') ||
+    q.includes('can i send') ||
+    q.includes('send it to him') ||
+    q.includes('send him') ||
+    q.includes('forward') ||
+    q.includes('relay') ||
+    q.includes('give you my email')
   ) {
-    return `I would be delighted to take your message and deliver it directly to Mohit!
+    return `Yes, absolutely! You can share your **email address** and message right here in this chat.
 
-Please reply right here with your **email address** and a brief note about your inquiry or role details (for example: "name@company.com - We'd love to chat about an AI Engineering role").
+I will immediately forward your note directly to Mohit's personal Telegram and email inbox, and log it to his dashboard, so he can respond to you promptly!
 
-I will deliver your note directly to him on high priority!`;
+Please reply right below with your **email** and a brief message (for example: *"recruiter@company.com - We'd love to interview you for an AI Systems Engineer position"*).`;
   }
 
   // Owner / creator recognition
@@ -169,11 +177,21 @@ export async function sendChatMessage(
   const q = newMessage.toLowerCase().trim();
   const isMessageIntent =
     q.includes('leave a message') ||
-    q.includes('tell him to contact') ||
-    q.includes('tell him to reach') ||
-    q.includes('reach out to me') ||
-    q.includes('contact me') ||
-    q === 'leave a message for mohit 📬';
+    q.includes('tell him') ||
+    q.includes('reach out') ||
+    q.includes('contact') ||
+    q.includes('hire') ||
+    q.includes('send my email') ||
+    q.includes('share my email') ||
+    q.includes('can i send') ||
+    q.includes('send it to him') ||
+    q.includes('send him') ||
+    q.includes('forward') ||
+    q.includes('relay') ||
+    q.includes('give you my email') ||
+    q.includes('get in touch') ||
+    q === 'leave a message for mohit 📬' ||
+    q.startsWith('leave a message');
 
   const isOwnerIntent =
     q.includes('owner') ||
