@@ -1,4 +1,5 @@
 import { PERSONAL_INFO } from '../data/portfolioData';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export interface ChatMessage {
   id: string;
@@ -157,51 +158,8 @@ What specific technical area or project would you like to explore?`;
 }
 
 /**
- * Call Groq API with automatic model failover (qwen/qwen3.8-27b -> openai/gpt-oss-120b)
- */
-async function callGroqWithFailover(
-  apiKey: string,
-  messages: Array<{ role: string; content: string }>
-): Promise<string> {
-  const models = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
-
-  for (const model of models) {
-    try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...messages,
-          ],
-          temperature: 0.6,
-          max_tokens: 650,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const text = data?.choices?.[0]?.message?.content;
-        if (text && text.trim().length > 0) {
-          return text.trim();
-        }
-      }
-    } catch (err) {
-      console.warn(`Groq model ${model} failed, trying next model:`, err);
-    }
-  }
-
-  throw new Error('All Groq models failed to return content');
-}
-
-/**
- * Send a chat message: calls live Groq LLM API using Mohit's configured key,
- * or falls back to conversational grounded knowledge if offline.
+ * Send a chat message: calls secure Supabase serverless Edge Function (holding private Groq key)
+ * or falls back seamlessly to the grounded knowledge engine if offline.
  */
 export async function sendChatMessage(
   history: ChatMessage[],
@@ -236,30 +194,31 @@ export async function sendChatMessage(
     return { text: groundedText, source: 'grounded-rag' };
   }
 
-  // 2. Check for optional client-provided key (if explicitly supplied in session)
-  const clientApiKey = typeof window !== 'undefined' ? (sessionStorage.getItem('mohit_llm_api_key') || '').trim() : '';
-
-  if (clientApiKey && clientApiKey.length > 5) {
-    const recentMessages = history.slice(-6).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-    recentMessages.push({ role: 'user', content: newMessage });
-
+  // 2. Invoke Secure Serverless Proxy (Supabase Edge Function) with First-Person Persona
+  if (isSupabaseConfigured && supabase) {
     try {
-      const output = await callGroqWithFailover(clientApiKey, recentMessages);
-      if (output && output.length > 0) {
+      const recentMessages = history.slice(-6).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+      recentMessages.push({ role: 'user', content: newMessage });
+
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { messages: recentMessages },
+      });
+
+      if (!error && data?.reply && typeof data.reply === 'string' && data.reply.trim().length > 0) {
         return {
-          text: output,
+          text: data.reply.trim(),
           source: 'llm',
         };
       }
     } catch (err) {
-      console.warn('Live LLM invocation failed, activating grounded fallback:', err);
+      console.debug('Supabase Edge Function chat notice (activating grounded fallback):', err);
     }
   }
 
-  // Deterministic, secure Grounded-RAG knowledge engine (Zero external keys required, 100% private)
+  // Deterministic, secure Grounded-RAG knowledge engine (Instant, 100% private fallback)
   const fallbackText = getConversationalGroundedResponse(newMessage);
   return { text: fallbackText, source: 'grounded-rag' };
 }
