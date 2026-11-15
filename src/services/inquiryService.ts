@@ -12,28 +12,8 @@ export interface Inquiry {
   created_at: string;
 }
 
-const LOCAL_STORAGE_KEY = 'portfolio_inquiries_store';
-
-// Helper to get local stored inquiries
-function getLocalInquiries(): Inquiry[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Inquiry[];
-  } catch (e) {
-    console.warn('Failed to parse local inquiries:', e);
-    return [];
-  }
-}
-
-// Helper to save local stored inquiries
-function saveLocalInquiries(inquiries: Inquiry[]) {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inquiries));
-  } catch (e) {
-    console.warn('Failed to save inquiries to localStorage:', e);
-  }
-}
+// Inquiries are stored securely in Supabase cloud database with strict Row-Level Security.
+// Plaintext buffering in browser localStorage has been removed to safeguard visitor PII.
 
 export const InquiryService = {
   /**
@@ -59,12 +39,7 @@ export const InquiryService = {
       created_at: new Date().toISOString(),
     };
 
-    // 1. Immediately buffer in localStorage so nothing is lost even if offline or table uninitialized
-    const local = getLocalInquiries();
-    local.unshift(newInquiry);
-    saveLocalInquiries(local);
-
-    // 2. Sync to Supabase if configured
+    // Sync directly to Supabase if configured
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('inquiries').insert([
@@ -82,10 +57,12 @@ export const InquiryService = {
         ]);
 
         if (error) {
-          console.warn('Supabase inquiry insert notice (stored in local buffer):', error.message);
+          console.warn('Supabase inquiry insert notice:', error.message);
+          return { success: false, inquiry: newInquiry, error: error.message };
         }
-      } catch (err) {
+      } catch (err: any) {
         console.warn('Network notice writing inquiry to Supabase:', err);
+        return { success: false, inquiry: newInquiry, error: err?.message || 'Network error' };
       }
     }
 
@@ -93,11 +70,9 @@ export const InquiryService = {
   },
 
   /**
-   * Fetch all inquiries (combining Supabase cloud database with local buffer)
+   * Fetch all inquiries for authenticated site owner from Supabase
    */
   async getInquiries(): Promise<Inquiry[]> {
-    const localInquiries = getLocalInquiries();
-
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase
@@ -106,69 +81,46 @@ export const InquiryService = {
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data)) {
-          // Merge Supabase entries with local entries (avoiding duplicates by id)
-          const map = new Map<string, Inquiry>();
-          data.forEach((item) => map.set(item.id, item as Inquiry));
-          localInquiries.forEach((item) => {
-            if (!map.has(item.id)) {
-              map.set(item.id, item);
-            }
-          });
-          const merged = Array.from(map.values()).sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          // Update local cache
-          saveLocalInquiries(merged);
-          return merged;
+          return data as Inquiry[];
         }
       } catch (err) {
-        console.warn('Failed to load inquiries from Supabase, serving local cache:', err);
+        console.error('Error fetching inquiries from Supabase:', err);
       }
     }
 
-    return localInquiries.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    return [];
   },
 
   /**
    * Update the status of an inquiry ('unread', 'read', 'replied')
    */
   async updateStatus(id: string, status: 'unread' | 'read' | 'replied'): Promise<boolean> {
-    const local = getLocalInquiries();
-    const target = local.find((i) => i.id === id);
-    if (target) {
-      target.status = status;
-      saveLocalInquiries(local);
-    }
-
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('inquiries').update({ status }).eq('id', id);
+        const { error } = await supabase.from('inquiries').update({ status }).eq('id', id);
+        return !error;
       } catch (err) {
-        console.warn('Failed to sync status update to Supabase:', err);
+        console.warn('Failed to update inquiry status in Supabase:', err);
+        return false;
       }
     }
-
-    return true;
+    return false;
   },
 
   /**
    * Delete an inquiry from Admin Panel
    */
   async deleteInquiry(id: string): Promise<boolean> {
-    const local = getLocalInquiries().filter((i) => i.id !== id);
-    saveLocalInquiries(local);
-
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('inquiries').delete().eq('id', id);
+        const { error } = await supabase.from('inquiries').delete().eq('id', id);
+        return !error;
       } catch (err) {
         console.warn('Failed to delete inquiry from Supabase:', err);
+        return false;
       }
     }
-
-    return true;
+    return false;
   },
 
   /**

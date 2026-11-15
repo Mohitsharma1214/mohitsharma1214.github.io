@@ -181,8 +181,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     const rawHtml = processMarkdownWithMath(content);
     return DOMPurify.sanitize(rawHtml, {
       USE_PROFILES: { html: true, mathMl: true, svg: true },
+      FORBID_TAGS: ['script', 'style', 'iframe', 'frame', 'object', 'embed', 'base'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
       ADD_TAGS: [
-        'iframe',
         'math',
         'annotation',
         'semantics',

@@ -145,13 +145,22 @@ CREATE TABLE IF NOT EXISTS public.inquiries (
 
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
 
--- Allow public / visitors / AI agent to insert new inquiries only
+-- Allow public / visitors / AI agent to insert valid inquiries only with strict length & email regex validation
 DROP POLICY IF EXISTS "Anyone can insert inquiries" ON public.inquiries;
-CREATE POLICY "Anyone can insert inquiries" 
+DROP POLICY IF EXISTS "Anyone can insert valid inquiries" ON public.inquiries;
+CREATE POLICY "Anyone can insert valid inquiries" 
 ON public.inquiries 
 FOR INSERT 
 TO anon, authenticated 
-WITH CHECK (true);
+WITH CHECK (
+  char_length(email) >= 5 
+  AND char_length(email) <= 255
+  AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+  AND char_length(message) >= 2
+  AND char_length(message) <= 5000
+  AND char_length(name) <= 100
+  AND (topic IS NULL OR char_length(topic) <= 200)
+);
 
 -- Revoke public read access (protect visitor contact data and recruiter messages)
 DROP POLICY IF EXISTS "Public read fallback" ON public.inquiries;

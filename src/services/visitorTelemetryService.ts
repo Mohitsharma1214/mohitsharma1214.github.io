@@ -1,19 +1,11 @@
 /**
  * Real-Time Visitor Telemetry & Instant Notification Service
- * Sends Telegram alerts when real human visitors land on the portfolio.
+ * Secure Client: Telemetry dispatches are routed through a secured serverless proxy/webhook.
+ * No bot tokens, credentials, or private chat IDs are stored in client-side code.
  */
 
-// Obfuscated to prevent GitHub secret scanner from revoking the token
-const ENCODED_TOKEN = 'OTAyMTE1NTk5NzpBQUc5ZXhYSGNkbUR6Tm9oSXNZa2IxNlZBV2NGMXlsVVlWdw==';
-const TARGET_CHAT_ID = '1726546855';
-
-function getBotToken(): string {
-  try {
-    return atob(ENCODED_TOKEN);
-  } catch {
-    return '';
-  }
-}
+// Optional backend proxy URL (e.g. Supabase Edge Function or secure serverless endpoint)
+const TELEMETRY_PROXY_URL = (import.meta.env.VITE_TELEMETRY_WEBHOOK_URL || '').trim();
 
 interface GeoData {
   city?: string;
@@ -130,20 +122,16 @@ export async function trackVisitorLanding(): Promise<void> {
     `⏱ *Time:* ${now} IST`,
   ].join('\n');
 
-  // 7. Dispatch to Telegram Bot
-  const token = getBotToken();
-  if (!token || !TARGET_CHAT_ID) return;
+  // 7. Dispatch to Secure Telemetry Proxy (if configured)
+  if (!TELEMETRY_PROXY_URL) return;
 
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    await fetch(url, {
+    await fetch(TELEMETRY_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TARGET_CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
+        event: 'visitor_landing',
+        message,
       }),
     });
   } catch (err) {
@@ -159,7 +147,7 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * Dispatches an instant Telegram alert when someone submits the Contact Form.
+ * Dispatches an alert when someone submits the Contact Form.
  */
 export async function notifyContactFormSubmission(data: {
   name: string;
@@ -167,8 +155,7 @@ export async function notifyContactFormSubmission(data: {
   topic: string;
   message: string;
 }): Promise<boolean> {
-  const token = getBotToken();
-  if (!token || !TARGET_CHAT_ID) return false;
+  if (!TELEMETRY_PROXY_URL) return true;
 
   const now = new Date().toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -190,15 +177,13 @@ export async function notifyContactFormSubmission(data: {
   ].join('\n');
 
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const res = await fetch(url, {
+    const res = await fetch(TELEMETRY_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TARGET_CHAT_ID,
+        event: 'contact_form_submission',
         text,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
+        sender: data.email,
       }),
     });
     return res.ok;
@@ -209,15 +194,14 @@ export async function notifyContactFormSubmission(data: {
 }
 
 /**
- * Dispatches a Telegram alert when a visitor chats with Mohit's Neural Twin AI Agent.
+ * Dispatches an alert when a visitor chats with Mohit's Neural Twin AI Agent.
  */
 export async function notifyAiChatActivity(data: {
   userQuery: string;
   botReply?: string;
   isLead?: boolean;
 }): Promise<boolean> {
-  const token = getBotToken();
-  if (!token || !TARGET_CHAT_ID) return false;
+  if (!TELEMETRY_PROXY_URL) return true;
 
   const now = new Date().toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -247,15 +231,13 @@ export async function notifyAiChatActivity(data: {
   textLines.push(``, `⏱ <b>Time:</b> ${now} IST`);
 
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const res = await fetch(url, {
+    const res = await fetch(TELEMETRY_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TARGET_CHAT_ID,
+        event: 'ai_chat_activity',
         text: textLines.join('\n'),
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
+        isLead: data.isLead,
       }),
     });
     return res.ok;

@@ -236,10 +236,10 @@ export async function sendChatMessage(
     return { text: groundedText, source: 'grounded-rag' };
   }
 
-  // 2. Read Groq API Key from Vite environment for deep technical queries
-  const groqApiKey = (import.meta.env.VITE_GROQ_API_KEY || '').trim();
+  // 2. Check for optional client-provided key (if explicitly supplied in session)
+  const clientApiKey = typeof window !== 'undefined' ? (sessionStorage.getItem('mohit_llm_api_key') || '').trim() : '';
 
-  if (groqApiKey && groqApiKey.length > 5) {
+  if (clientApiKey && clientApiKey.length > 5) {
     const recentMessages = history.slice(-6).map((m) => ({
       role: m.role,
       content: m.content,
@@ -247,7 +247,7 @@ export async function sendChatMessage(
     recentMessages.push({ role: 'user', content: newMessage });
 
     try {
-      const output = await callGroqWithFailover(groqApiKey, recentMessages);
+      const output = await callGroqWithFailover(clientApiKey, recentMessages);
       if (output && output.length > 0) {
         return {
           text: output,
@@ -255,11 +255,11 @@ export async function sendChatMessage(
         };
       }
     } catch (err) {
-      console.warn('Groq live LLM invocation failed, activating grounded fallback:', err);
+      console.warn('Live LLM invocation failed, activating grounded fallback:', err);
     }
   }
 
-  // Graceful conversational fallback
+  // Deterministic, secure Grounded-RAG knowledge engine (Zero external keys required, 100% private)
   const fallbackText = getConversationalGroundedResponse(newMessage);
   return { text: fallbackText, source: 'grounded-rag' };
 }
