@@ -98,7 +98,7 @@ export const PERSONAL_INFO = {
   bioParagraphs: [
     "I am an AI Engineer focused on the intersection of deep learning model design and production systems engineering. My work centers on delivering reliable, low-latency AI solutions—ranging from sub-120ms computer vision backends handling 5,000+ daily images to edge-deployed facial tracking systems and strictly grounded LLM agent pipelines.",
     "My technical foundation bridges PyTorch, OpenCV, CUDA, ONNX, and TensorRT on the inference side, paired with asynchronous Python (FastAPI, asyncio) and containerized infrastructure on the backend. Rather than chasing superficial generative wrappers, I prioritize latency bounds, deterministic guardrails, evaluation benchmarks, and measurable business outcomes.",
-    "Previously, I engineered high-throughput computer vision backends at Hairscope and NLP pipelines at Centilytics. Currently at Sodio Technologies, I develop agentic automation workflows and recommendation pipelines, collaborating directly with clients to translate business requirements into robust production features."
+    "Previously, I engineered high-throughput computer vision backends at Hairscope, NLP pipelines at Centilytics, and agentic automation workflows and recommendation pipelines at Sodio Technologies. I specialize in collaborating directly with teams to translate complex requirements into robust production AI features."
   ]
 };
 
@@ -348,7 +348,7 @@ export const EXPERIENCES: ExperienceItem[] = [
   {
     company: "Sodio Technologies",
     role: "AI Developer",
-    period: "June 2026 – Present",
+    period: "June 2026 – Oct 2026",
     type: "Full-Time",
     location: "Remote",
     highlights: [

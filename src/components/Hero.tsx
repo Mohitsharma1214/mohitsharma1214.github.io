@@ -21,11 +21,11 @@ export const Hero: React.FC = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
               </span>
               <span className="text-xs font-mono font-medium text-slate-200">
-                AI Developer @ Sodio Technologies
+                AI Systems Engineer
               </span>
               <span className="text-slate-600">|</span>
-              <span className="text-xs text-cyan-300 font-mono hidden sm:inline">
-                Open to High-Impact AI Roles
+              <span className="text-xs text-emerald-400 font-mono font-semibold">
+                Looking for Opportunities
               </span>
             </div>
 

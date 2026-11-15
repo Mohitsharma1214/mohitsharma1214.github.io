@@ -130,7 +130,7 @@ function buildAboutSnapshot() {
     <div class="prose max-w-none text-slate-700 space-y-4 leading-relaxed">
       <p>I am an AI Engineer focused on the intersection of deep learning model design and production systems engineering. My work centers on delivering reliable, low-latency AI solutions—ranging from sub-120ms computer vision backends handling 5,000+ daily images to edge-deployed facial tracking systems and strictly grounded LLM agent pipelines.</p>
       <p>My technical foundation bridges PyTorch, OpenCV, CUDA, ONNX, and TensorRT on the inference side, paired with asynchronous Python (FastAPI, asyncio) and containerized infrastructure on the backend. Rather than chasing superficial generative wrappers, I prioritize latency bounds, deterministic guardrails, evaluation benchmarks, and measurable business outcomes.</p>
-      <p>Previously, I engineered high-throughput computer vision backends at Hairscope and NLP pipelines at Centilytics. Currently at Sodio Technologies, I develop agentic automation workflows and recommendation pipelines, collaborating directly with clients to translate business requirements into robust production features.</p>
+      <p>Previously, I engineered high-throughput computer vision backends at Hairscope, NLP pipelines at Centilytics, and agentic automation workflows and recommendation pipelines at Sodio Technologies. I specialize in collaborating directly with teams to translate complex requirements into robust production AI features.</p>
     </div>
   </section>
 
@@ -308,7 +308,7 @@ function buildExperienceSnapshot() {
           <h2 class="text-xl font-bold text-slate-950">AI Developer</h2>
           <div class="text-sm font-semibold text-blue-600">Sodio Technologies • Full-Time • Remote</div>
         </div>
-        <span class="text-xs font-mono text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-medium">June 2026 – Present</span>
+        <span class="text-xs font-mono text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-medium">June 2026 – Oct 2026</span>
       </div>
       <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700 leading-relaxed">
         <li>Built a post recommendation system to deliver personalized content recommendations using user engagement and content semantic signals.</li>
@@ -687,7 +687,7 @@ const staticRoutes = [
   },
   {
     path: 'experience',
-    title: 'Work Experience | Mohit Sharma • AI Developer at Sodio Technologies',
+    title: 'Work Experience | Mohit Sharma • AI Systems Engineer',
     description: 'Verified engineering experience delivering production computer vision backends at Hairscope, Sodio Technologies, and Centilytics.',
     canonical: `${BASE_URL}/experience/`,
     breadcrumbName: 'Experience',

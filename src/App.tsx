@@ -67,7 +67,7 @@ function PageMetadataUpdater() {
       '/': 'Mohit Sharma | AI Engineer • Computer Vision & LLM Systems',
       '/about': 'About Mohit Sharma | AI Engineer & Systems Specialist',
       '/projects': 'Projects & Case Studies | Mohit Sharma • AI Engineer',
-      '/experience': 'Work Experience | Mohit Sharma • AI Developer at Sodio Technologies',
+      '/experience': 'Work Experience | Mohit Sharma • AI Systems Engineer',
       '/skills': 'Skills & Technology Stack | Mohit Sharma • AI Engineer',
       '/blogs': 'Technical Blogs & Case Studies | Mohit Sharma • AI Engineer',
       '/writing': 'Technical Blogs & Case Studies | Mohit Sharma • AI Engineer',

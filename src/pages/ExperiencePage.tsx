@@ -72,8 +72,8 @@ export const ExperiencePage: React.FC<ExperiencePageProps> = ({ onSelectProject 
         {/* Highlights Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-200">
           <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs">
-            <div className="text-[10px] font-mono uppercase text-slate-500 font-semibold">Current Role</div>
-            <div className="text-sm font-bold text-slate-900 mt-1">AI Developer @ Sodio Tech</div>
+            <div className="text-[10px] font-mono uppercase text-slate-500 font-semibold">Availability Status</div>
+            <div className="text-sm font-bold text-emerald-700 mt-1">Looking for Opportunities</div>
           </div>
           <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs">
             <div className="text-[10px] font-mono uppercase text-slate-500 font-semibold">Specialization</div>

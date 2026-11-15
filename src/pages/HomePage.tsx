@@ -108,11 +108,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
                 <span className="text-xs font-mono font-medium text-slate-800">
-                  AI Developer @ Sodio Technologies
+                  AI Systems Engineer
                 </span>
-                <span className="text-slate-300 hidden sm:inline">|</span>
-                <span className="text-xs text-slate-500 font-mono hidden sm:inline">
-                  Open to AI Roles
+                <span className="text-slate-300">|</span>
+                <span className="text-xs text-emerald-700 font-mono font-semibold">
+                  Looking for Opportunities
                 </span>
               </div>
 
