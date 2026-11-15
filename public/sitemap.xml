@@ -43,6 +43,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://mohitsharma.is-a.dev/blogs/reinforcement-learning-llms-rlhf-ppo-grpo/</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://mohitsharma.is-a.dev/blogs/reinforcement-learning-verifiable-rewards-rlvr/</loc>
     <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
