@@ -38,6 +38,9 @@ INTERACTION GUIDELINES:
 - If asked about non-technical topics or topics outside my portfolio, politely bring the conversation back to my AI engineering work and systems.`;
 
 const GROQ_MODELS = [
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
   'llama-3.3-70b-versatile',
   'llama-3.1-8b-instant',
 ];
@@ -80,8 +83,8 @@ Deno.serve(async (req) => {
       max_tokens: 650,
     };
 
+    const errors: string[] = [];
     let reply = '';
-    let lastError = null;
 
     for (const model of GROQ_MODELS) {
       try {
@@ -102,15 +105,16 @@ Deno.serve(async (req) => {
             break;
           }
         } else {
-          lastError = await groqRes.text();
+          const errText = await groqRes.text();
+          errors.push(`${model}: ${errText}`);
         }
-      } catch (err) {
-        lastError = err;
+      } catch (err: any) {
+        errors.push(`${model}: ${err?.message || String(err)}`);
       }
     }
 
     if (!reply) {
-      throw new Error(lastError ? String(lastError) : 'All Groq models failed to return response');
+      throw new Error(`Groq API failure: ${errors.join(' | ')}`);
     }
 
     return new Response(
