@@ -2,8 +2,8 @@ name: 🤖 Sitemap Robot (Auto-Sync & Search Engine Ping)
 
 on:
   schedule:
-    # Run every 6 hours to check if new blogs were published in Supabase
-    - cron: '0 */6 * * *'
+    # Run every 2 hours to check if new blogs were published in Supabase
+    - cron: '0 */2 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [blog_published, sync_sitemap]
@@ -20,6 +20,8 @@ concurrency:
 jobs:
   sync-sitemap:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.git_status.outputs.changed }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -57,3 +59,42 @@ jobs:
           git add public/sitemap.xml public/sitemap.txt public/robots.txt
           git commit -m "🤖 robot(sitemap): auto-sync sitemap.xml with newly published blogs"
           git push origin main
+
+  deploy-pages:
+    name: 🚀 Deploy Pages on Sitemap Changes
+    needs: sync-sitemap
+    if: needs.sync-sitemap.outputs.changed == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Updated Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build production site
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://zxovekhtcajtefedkkee.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_JxI18d2ketnFvFZ6Yn0Beg_yXpmd7uJ' }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
