@@ -132,24 +132,30 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@600;700;800;900&display=swap" />
     </noscript>
 
-    <!-- Validated JSON-LD Structured Data: WebSite & ProfilePage with mainEntity Person -->
+    <!-- Dedicated Google Search Site Name Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://mohitsharma.is-a.dev/#website",
+        "url": "https://mohitsharma.is-a.dev/",
+        "name": "Mohit Sharma",
+        "alternateName": [
+          "Mohit Sharma Portfolio",
+          "mohitsharma.is-a.dev",
+          "Mohit Sharma AI Systems Engineer",
+          "Mohit Sharma - AI Engineer"
+        ],
+        "description": "Portfolio of Mohit Sharma, AI Systems Engineer specializing in real-time computer vision, edge AI, and production LLM pipelines.",
+        "inLanguage": "en-US"
+      }
+    </script>
+
+    <!-- ProfilePage & Person Structured Data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@graph": [
-          {
-            "@type": "WebSite",
-            "@id": "https://mohitsharma.is-a.dev/#website",
-            "url": "https://mohitsharma.is-a.dev/",
-            "name": "Mohit Sharma",
-            "alternateName": [
-              "Mohit Sharma Portfolio",
-              "Mohit Sharma AI Systems Engineer",
-              "Mohit Sharma AI Engineer"
-            ],
-            "description": "Portfolio of Mohit Sharma, AI Engineer specializing in real-time computer vision, edge AI, and production LLM pipelines.",
-            "inLanguage": "en-US"
-          },
           {
             "@type": "ProfilePage",
             "@id": "https://mohitsharma.is-a.dev/#profilepage",
