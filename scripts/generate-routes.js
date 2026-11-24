@@ -102,6 +102,19 @@ function buildAboutSnapshot() {
     </p>
   </header>
 
+  <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-3 shadow-xs my-6">
+    <div class="flex items-center gap-3">
+      <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse inline-block shrink-0"></span>
+      <div>
+        <div class="text-sm font-bold">Career &amp; Employment Status: Looking for Opportunities</div>
+        <div class="text-xs text-emerald-800">Concluded tenure at Sodio Technologies (June 2026 – Oct 2026). Currently open and actively interviewing for full-time AI Systems, Computer Vision, and MLOps roles worldwide (Immediate Start &bull; Remote or On-site Relocation).</div>
+      </div>
+    </div>
+    <a href="/contact/" class="text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 px-4 py-2 rounded-xl transition-colors">
+      Schedule 15-Min Intro &rarr;
+    </a>
+  </div>
+
   <section class="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-slate-200 my-8">
     <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
       <div class="text-2xl font-black text-blue-600">&lt;120ms</div>
@@ -299,6 +312,18 @@ function buildExperienceSnapshot() {
     <p class="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
       Full-time engineering tenures delivering production computer vision backends, agentic LLM systems, and edge ML models.
     </p>
+    <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse inline-block shrink-0"></span>
+        <div>
+          <div class="text-sm font-bold">Current Availability Status: Looking for Opportunities</div>
+          <div class="text-xs text-emerald-800">Concluded tenure at Sodio Technologies (Oct 2026). Actively interviewing for full-time AI Engineering &amp; Computer Vision roles worldwide (Immediate Start &bull; Remote or On-site Relocation).</div>
+        </div>
+      </div>
+      <a href="/contact/" class="text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 px-4 py-2 rounded-xl transition-colors">
+        Schedule Intro &rarr;
+      </a>
+    </div>
   </header>
 
   <div class="space-y-8">
@@ -592,6 +617,42 @@ function buildRouteSnapshot(route, blogs) {
       ? `<img src="${escapeHtml(b.cover_image)}" alt="${escapeHtml(b.title)}" loading="eager" style="max-width:100%;height:auto;border-radius:1rem;margin:1.5rem 0">`
       : '';
 
+    const faqHtml = route.faqs && route.faqs.length > 0
+      ? `<section class="mt-12 pt-8 border-t border-slate-200" aria-label="Frequently Asked Questions">
+          <h2 class="text-2xl font-bold text-slate-950 mb-6">Production Architecture FAQ &amp; Key Questions</h2>
+          <div class="space-y-6">
+            ${route.faqs.map(f => `
+              <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <h3 class="text-base font-bold text-slate-900">${escapeHtml(f.q)}</h3>
+                <p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(f.a)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>`
+      : '';
+
+    const leadCtaHtml = `<div class="my-10 p-6 sm:p-8 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-mono font-bold uppercase tracking-wider">
+            Full-Time AI Engineering Availability
+          </div>
+          <h3 class="text-xl sm:text-2xl font-bold text-white">Need a Production-Grade LLM, RAG, or Computer Vision Pipeline?</h3>
+          <p class="text-sm text-slate-300 max-w-xl leading-relaxed">
+            Mohit Sharma is an AI Systems Specialist delivering &lt;120ms P95 clinical inference pipelines and registered edge IP. Actively interviewing for full-time AI Engineer, Computer Vision, and MLOps roles worldwide.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+          <a href="/contact/" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all shadow-md">
+            <span>Contact Mohit</span> &rarr;
+          </a>
+          <a href="mailto:mohitxsharma09@gmail.com" class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium border border-slate-700 transition-all">
+            <span>Email Direct</span>
+          </a>
+        </div>
+      </div>
+    </div>`;
+
     return `<main class="max-w-4xl mx-auto px-4 py-12 text-slate-900 font-sans">
       <nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-6 font-mono">
         <a href="/" class="hover:text-blue-600">Home</a> / <a href="/blogs/" class="hover:text-blue-600">Blogs</a> / <span class="text-slate-800">${escapeHtml(b.title || route.title)}</span>
@@ -607,6 +668,8 @@ function buildRouteSnapshot(route, blogs) {
           ${image}
         </header>
         <div class="prose max-w-none text-slate-800 leading-relaxed">${renderMarkdownSnapshot(b.content_markdown || '')}</div>
+        ${faqHtml}
+        ${leadCtaHtml}
         <p class="pt-8 border-t border-slate-200 mt-10"><a href="/blogs/" class="font-semibold text-blue-600 hover:underline">← All technical blogs</a></p>
       </article>
     </main>`;
@@ -731,6 +794,77 @@ const staticRoutes = [
   },
 ];
 
+const BLOG_SEO_OVERRIDES = {
+  'production-ready-rag-llm-applications': {
+    title: 'Production LLM RAG Pipeline: Vector DBs, Hybrid Search & Latency Architecture | Mohit Sharma',
+    description: 'Engineering blueprint for production LLM RAG pipelines: ChromaDB chunking, BM25 + dense hybrid reranking, <120ms latency budgets, and zero-hallucination Pydantic gates.',
+    faqs: [
+      {
+        q: 'Which retrieval augmented generation tool is best for production llm applications?',
+        a: 'For production RAG systems with strict latency SLAs, a hybrid architecture combining ChromaDB or Milvus for dense vector search, BM25 for sparse keyword matching, and a cross-encoder reranker (e.g., bge-reranker-large) provides the highest retrieval accuracy and deterministic refusal handling.',
+      },
+      {
+        q: 'How does automated embedding affect retrieval freshness, reliability, and production maintenance?',
+        a: 'Automated embedding pipelines keep vector collections synchronized with source documents, but require transactional versioning, embedding model immutability, and duplicate detection to avoid index skew and query regression in production.',
+      },
+      {
+        q: 'What is the optimal latency budget for a production LLM RAG pipeline?',
+        a: 'A production SLA should target sub-2 second total turnaround: vector retrieval <120ms, hybrid reranking <80ms, context assembly <30ms, and streaming first-token generation <800ms.',
+      },
+    ],
+  },
+  'reinforcement-learning-verifiable-rewards-rlvr': {
+    title: 'RLVR (Reinforcement Learning with Verifiable Rewards): Teaching LLMs to Reason | Mohit Sharma',
+    description: 'Deep dive into RLVR (Reinforcement Learning with Verifiable Rewards): automated evaluation, rule-based reasoning verification, and post-training architectures for LLMs.',
+    faqs: [
+      {
+        q: 'What is Reinforcement Learning with Verifiable Rewards (RLVR) in LLMs?',
+        a: 'RLVR is a reinforcement learning paradigm where models are rewarded based on deterministic verification (such as unit test execution, math solver checks, or formal proof checkers) rather than subjective human preference models or LLM-as-a-judge scores.',
+      },
+      {
+        q: 'Which cloud providers enable reinforcement learning with verifiable rewards on large language models while offering experiment tracking that meets fedramp moderate requirements?',
+        a: 'Enterprise cloud platforms like AWS Bedrock / SageMaker, Azure AI Studio, and Google Cloud Vertex AI support custom RL training with verifiable reward functions, integrated MLflow / Weights & Biases experiment tracking, and FedRAMP-compliant audit logging.',
+      },
+      {
+        q: 'Which cloud services support reinforcement learning with verifiable rewards on large language models, including built-in experiment tracking and audit logs?',
+        a: 'Managed platforms such as AWS SageMaker Model Training with CloudWatch/CloudTrail, Databricks Mosaic AI with MLflow, and Google Cloud Vertex AI Custom Training provide enterprise-grade audit logging, containerized test harnesses for verifiable rewards, and experiment tracking.',
+      },
+      {
+        q: 'How does RLVR differ from RLHF (Reinforcement Learning from Human Feedback)?',
+        a: 'Unlike RLHF which relies on noisy, subjective human reward models that suffer from reward hacking, RLVR employs verifiable ground-truth oracles (compilers, unit tests, symbolic math engines) providing binary or granular mathematical feedback that cannot be gamed.',
+      },
+    ],
+  },
+  'reinforcement-learning-llms-rlhf-ppo-grpo': {
+    title: 'Reinforcement Learning for LLMs: RLHF, PPO & GRPO Architecture Guide | Mohit Sharma',
+    description: 'Comprehensive breakdown of LLM reinforcement learning algorithms: Reward modeling, PPO policy optimization, and DeepSeek-style GRPO group relative policy optimization.',
+    faqs: [
+      {
+        q: 'What is Group Relative Policy Optimization (GRPO) in large language models?',
+        a: 'GRPO is a reinforcement learning algorithm that removes the separate critic/value model required by PPO. Instead, it generates a group of outputs for each prompt and computes relative advantages across the group, cutting training memory footprint by up to 50%.',
+      },
+      {
+        q: 'When should engineering teams use PPO vs GRPO for LLM post-training?',
+        a: 'PPO is suited for general conversational alignment with complex reward surfaces, while GRPO is optimal for reasoning, mathematical derivation, and competitive coding tasks where multiple rollouts can be scored comparatively with lower memory overhead.',
+      },
+    ],
+  },
+  'reliable-structured-output-generative-ai-llm-systems': {
+    title: 'Structured Outputs with LLMs: Pydantic, JSON Schema & Constrained Decoding | Mohit Sharma',
+    description: 'Production guide to guaranteed structured outputs from LLMs: Pydantic schemas, grammar-constrained decoding, JSON schema validation, and latency budgets.',
+    faqs: [
+      {
+        q: 'How to ensure 100% deterministic structured outputs from LLMs?',
+        a: 'To guarantee schema compliance, combine CFG (Context-Free Grammar) constrained token sampling at inference time with Pydantic runtime schema validation and automated repair fallback loops.',
+      },
+    ],
+  },
+  'event-driven-architecture-machine-learning-asynchronous-pipelines': {
+    title: 'Event-Driven Machine Learning: Asynchronous Pipelines & Latency Optimization | Mohit Sharma',
+    description: 'Architecture breakdown of event-driven ML systems: message brokers, Celery/FastAPI worker queues, real-time inference decoupling, and failure isolation.',
+  },
+};
+
 async function generateAllRoutes() {
   const baseHtmlPath = path.join(distDir, 'index.html');
   if (!fs.existsSync(baseHtmlPath)) {
@@ -746,7 +880,8 @@ async function generateAllRoutes() {
   if (blogIndexRoute) blogIndexRoute.blogIndexData = blogs;
 
   const blogRoutes = blogs.map((blog) => {
-    const rawDesc = blog.subtitle || blog.summary || 'Technical breakdown and production engineering analysis by Mohit Sharma.';
+    const seoOverride = BLOG_SEO_OVERRIDES[blog.id] || {};
+    const rawDesc = seoOverride.description || blog.subtitle || blog.summary || 'Technical breakdown and production engineering analysis by Mohit Sharma.';
     // Clean description to avoid HTML/quotes breaking attributes
     const cleanDesc = rawDesc.replace(/["\n\r]/g, ' ').substring(0, 160).trim();
     const coverImage = blog.cover_image
@@ -755,12 +890,13 @@ async function generateAllRoutes() {
 
     return {
       path: `blogs/${blog.id}`,
-      title: `${blog.title} | Mohit Sharma`,
+      title: seoOverride.title || `${blog.title} | Mohit Sharma`,
       description: cleanDesc,
       canonical: `${BASE_URL}/blogs/${blog.id}/`,
       image: coverImage,
       type: 'article',
       blogData: blog,
+      faqs: seoOverride.faqs || null,
     };
   });
 
@@ -919,6 +1055,21 @@ async function generateAllRoutes() {
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: breadcrumbItems,
+      });
+    }
+
+    if (route.faqs && route.faqs.length > 0) {
+      extraSchemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: route.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.a,
+          },
+        })),
       });
     }
 

@@ -178,6 +178,38 @@ export const BlogPostPage: React.FC = () => {
         <MarkdownRenderer content={blog.contentMarkdown} />
       </div>
 
+      {/* High-Impact AI Architect & Engineering Availability CTA Card */}
+      <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-md mt-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-mono font-bold uppercase tracking-wider">
+              Full-Time AI Engineering Availability
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">
+              Need a Production-Grade LLM, RAG, or Computer Vision Pipeline?
+            </h3>
+            <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+              Mohit Sharma is an AI Systems Specialist delivering &lt;120ms P95 latency pipelines and registered edge IP. Actively interviewing for full-time AI Engineer, Computer Vision, and MLOps roles worldwide.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all shadow-md text-center"
+            >
+              <span>Get in Touch</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <a
+              href="mailto:mohitxsharma09@gmail.com"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium border border-slate-700 transition-all text-center"
+            >
+              <span>Email Direct</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Quality Verification Footer */}
       <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
         <div className="space-y-1 text-center sm:text-left">
